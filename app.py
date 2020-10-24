@@ -1,9 +1,10 @@
 import subprocess
+import time
 from logging import getLogger
 from pathlib import Path
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, BackgroundTasks
 
 logger = getLogger(__name__)
 lock_path = Path('/tmp/logitech_on.lock')
@@ -13,18 +14,18 @@ app = FastAPI()
 
 
 @app.get("/on")
-async def root():
+async def root(delay: int = 0, background_tasks: BackgroundTasks = None):
     if not lock_path.exists():
         lock_path.touch()
-        toggle_power()
+        background_tasks.add_task(toggle_power, delay=delay)
     return get_status()
 
 
 @app.get("/off")
-async def root():
+async def root(delay: int = 0, background_tasks: BackgroundTasks = None):
     if lock_path.exists():
         lock_path.unlink()
-        toggle_power()
+        background_tasks.add_task(toggle_power, delay=delay)
     return get_status()
 
 
@@ -39,7 +40,9 @@ def get_status():
     return {'status': 'off'}
 
 
-def toggle_power():
+def toggle_power(delay=0):
+    if delay:
+        time.sleep(delay / 1000)
     result = subprocess.run(power_cmd, capture_output=True, text=True)
     if result.stdout:
         logger.info(result.stdout)

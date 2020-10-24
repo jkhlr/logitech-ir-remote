@@ -1,3 +1,8 @@
 #!/bin/bash
 lircd --driver=default --device=/dev/lirc0
-exec uvicorn app:app --host 0.0.0.0 --port 80
+exec gunicorn app:app \
+  -k uvicorn.workers.UvicornWorker \
+  --bind 0.0.0.0:80 \
+  --log-level=info \
+  --access-logfile - \
+  --error-logfile -
