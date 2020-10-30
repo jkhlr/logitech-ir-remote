@@ -11,7 +11,7 @@ Connect IR emitter to Raspberry Pi GPIO
 
 ## Activate Kernel Modules
 
-``` shell script
+```shell script
 echo 'lirc_dev' >> /etc/modules 
 echo 'lirc_rpi gpio_out_pin=24' >> /etc/modules
 echo 'dtoverlay=lirc-rpi,gpio_out_pin=24' >> /boot/config.txt
